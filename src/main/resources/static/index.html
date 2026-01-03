@@ -21,8 +21,6 @@
 <body>
     <div id="render_text"></div>
 </body>
-
-</html>
 <script>
     console.log("console check 📌📌");
 
@@ -31,7 +29,8 @@
     function send_api_call() {
         console.log("📄calling api...");
 
-        fetch("http://localhost:8080/show")
+       // fetch("http://localhost:8080/show") // use when cors origin - now  springboot server itself handles the front end
+        fetch("/show")
             .then(response => {
 
                 if (!response.ok) {
@@ -57,3 +56,5 @@
 
     }
 </script>
+
+</html>
