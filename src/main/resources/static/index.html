@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='one.js'></script>
+    <style>
+        .render_text {
+            border-width: 1px;
+            border-color: red;
+            border: radius 30px;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="render_text"></div>
+</body>
+
+</html>
+<script>
+    console.log("console check 📌📌");
+
+    send_api_call();
+
+    function send_api_call() {
+        console.log("📄calling api...");
+
+        fetch("http://localhost:8080/show")
+            .then(response => {
+
+                if (!response.ok) {
+                    return "response failed ❌";
+                }
+
+                return response.text()
+            })
+            .then(data => {
+                console.log("DATA RECEIVED : " + data);
+                document.getElementById("render_text").innerText = data;
+            })
+            .catch(error => {
+                console.log("❌ ERROR:", error.name);
+                console.log(error.message);
+            })
+            .finally(() => {
+                console.log("📜 api call over...");
+            });
+
+    }
+    function load_element() {
+
+    }
+</script>
