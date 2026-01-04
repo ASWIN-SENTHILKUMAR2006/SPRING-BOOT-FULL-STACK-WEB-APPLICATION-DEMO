@@ -11,3 +11,5 @@ public class Application {
 	}
 
 }
+
+//Frontend File is in Static Folder - src/main/resources/static/
