@@ -116,12 +116,3 @@ If you'd like to contribute: fork → branch → PR with a clear description.
 ## License
 
 Use freely for learning and teaching. Add an explicit license file (MIT/Apache-2.0) if you want to clarify reuse terms.
-
----
-
-If you want, I can:
-- Tailor this README to include exact commands for your build (Maven/Gradle) and Java version.
-- Add a ready-to-use `data.sql` seed file or example `application.properties` tuned for your project.
-- Provide a commit-ready README file and show the exact git commands to add it to the repository.
-
-How would you like me to proceed?
