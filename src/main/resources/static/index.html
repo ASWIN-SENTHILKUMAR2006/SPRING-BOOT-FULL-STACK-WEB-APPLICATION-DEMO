@@ -8,6 +8,16 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <script src='one.js'></script>
+    <!-- // datatable -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/datatables@1.10.18/media/js/jquery.dataTables.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
     <style>
         .render_text {
             border-width: 1px;
@@ -15,21 +25,212 @@
             border: radius 30px;
             padding: 5px;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #e6d7b7;
+        }
+
+        #title-block {
+            height: 25px;
+
+        }
     </style>
 </head>
 
 <body>
+    <div id="title-block" class="container-fluid  bg-dark"> </div>
     <div id="render_text"></div>
+
+    <div id="container-cards" class="row g-4">
+    </div>
+
+    <div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="edit_modal_body">
+
+
+
+
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="edit_form_savebtn">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script>
     console.log("console check 📌📌");
 
-    send_api_call();
+    fetch_cards();
+
+
+
+
+    function delete_card(ID) {
+        fetch(`/delete/${ID}`, {
+            method: 'DELETE'
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message);
+                //location.reload();
+                fetch_cards();
+            });
+
+
+
+    }
+    function edit_pop(Id, Name, Experience, FileName) {
+        // console.log(Id);
+
+        let modalbody = document.getElementById("edit_modal_body");
+
+        modalbody.innerHTML = `
+       
+        <form id="user_dataform">
+                        <input type="hidden" name="id" value="${Id}">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" aria-describedby="name" value="${Name}">
+
+                        </div>
+                        <div class="mb-3">
+                            <label for="Experience" class="form-label" >Experience</label>
+                            <input type="text" class="form-control" value="${Experience}" id="experience">
+                        </div>
+                        <div class="mb-3 " >
+                            <label  class= "form-label" for="File" > File <label>
+                                    <input type="text" class="form-control" value="${FileName}" id="filename">
+                        </div>
+                        
+                    </form>
+        `;
+        //<button type="submit" class="btn btn-primary" id="user_dataform_submit">Submit</button>
+
+        const edit_form_submitbtn = document.getElementById("edit_form_savebtn");//button from modal footer
+
+        // only <form> </form> inside has submit event for button out-side  when external button use click
+        edit_form_submitbtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+
+
+            const data = {
+                ID: parseInt(Id),
+                Name: document.getElementById("name").value,
+                Experience: parseInt(document.getElementById("experience").value) || 0,
+                FileName: document.getElementById("filename").value
+            };
+            console.log("DATA => ", data);
+            // sending update call - api()
+            fetch(`/edit/${Id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => { return response.json() })
+                .then(data => {
+                    //alert(data.message);
+
+                    // modal close
+                    const modal = document.getElementById("edit_modal");
+                    const modalinstance = bootstrap.Modal.getInstance(modal);
+
+                    if (modalinstance) {
+                        modalinstance.hide();
+                    }
+
+                    fetch_cards(); // or use location.reload();
+
+                    console.log(data.message);
+                });
+
+
+
+        });
+
+    }
+
+
+
+    function fetch_cards() {
+        fetch("/show").
+            then(response => {
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                let contain = document.getElementById("container-cards");
+                contain.innerHTML = "";
+
+                data.forEach(item => {
+                    let card_data = `<div class = "col-12 col-md-4 col-lg-3">
+                                         <div class="card container-fluid">
+                                    <img src="${item.FileName}" class="card-img-top" alt="...">
+                                    <div class="card-body">
+                                        <p class="card-text"> <B> Name :  </B>${item.Name}</p>
+                                        <p class="card-text"> <B> Experience :  </B> ${item.Experience}</p>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_modal" onClick = "edit_pop(${item.ID},'${item.Name}','${item.Experience}' , '${item.FileName}')"  > EDIT </button>
+                                        <button class="btn btn-danger" onClick= "delete_card(${item.ID})"> DELETE </button>
+                                    </div>
+                                    </div>
+	                                </div>`;
+
+                    contain.innerHTML += card_data;
+
+
+                });
+
+            })
+
+
+    }
+
+
+    function load_table(data) {
+
+        if ($.fn.DataTable.isDataTable('#mytable')) {
+            $('#mytable').DataTable().destroy();
+        }
+
+        let table_body = document.getElementById("mytablebody");
+        table_body.innerHTML = " ";
+        data.forEach(emp => {
+            const row = `
+<tr>
+<td>${emp.ID} </td>
+<td> ${emp.Name}</td>
+<td> ${emp.Experience}</td>
+</tr>
+`;
+            table_body.innerHTML += row;
+        })
+
+
+        $('#mytable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true
+        });
+
+    }
 
     function send_api_call() {
         console.log("📄calling api...");
 
-       // fetch("http://localhost:8080/show") // use when cors origin - now  springboot server itself handles the front end
+        // fetch("http://localhost:8080/show") // use when cors origin - now  springboot server itself handles the front end
         fetch("/show")
             .then(response => {
 
@@ -37,11 +238,11 @@
                     return "response failed ❌";
                 }
 
-                return response.text()
+                return response.json()
             })
             .then(data => {
                 console.log("DATA RECEIVED : " + data);
-             
+
                 document.getElementById("render_text").innerText = data;
             })
             .catch(error => {
@@ -53,9 +254,30 @@
             });
 
     }
-    
 
-    
+    function send_api_list() {
+        console.log("api call started");
+        fetch("/slist")
+            .then(response => {
+                if (!response.ok) {
+                    return "response failed ❌";
+                }
+                return response.json();
+            })
+            .then(data => {
+                load_table(data);
+            }).catch(error => {
+                console.log("❌ ERROR:", error.name);
+                console.log(error.message);
+
+            }).finally(() => {
+                console.log("api call over");
+
+            })
+    }
+
+
+
 </script>
 
 </html>
